@@ -12,9 +12,9 @@
 }
 
 .participants-list {
-  margin: 8px 0 0 18px;
+  margin: 8px 0 0 0;
   padding-left: 0;
-  list-style-type: disc;
+  list-style-type: none;
   color: #222;
   font-size: 15px;
 }
@@ -22,6 +22,19 @@
 .participants-list li {
   margin-bottom: 2px;
   line-height: 1.4;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+.delete-participant {
+  cursor: pointer;
+  color: #c62828;
+  margin-left: 6px;
+  font-size: 16px;
+  transition: color 0.2s;
+}
+.delete-participant:hover {
+  color: #b71c1c;
+}
 }
 
 .participants-list.empty {

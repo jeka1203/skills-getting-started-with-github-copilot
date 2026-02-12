@@ -24,7 +24,9 @@ document.addEventListener("DOMContentLoaded", () => {
         let participantsHTML = "";
         if (details.participants && details.participants.length > 0) {
           participantsHTML = `<ul class="participants-list">` +
-            details.participants.map(p => `<li>${p}</li>`).join("") +
+            details.participants.map(p =>
+              `<li><span class="participant-email">${p}</span> <span class="delete-participant" title="Entfernen" data-activity="${name}" data-email="${p}">🗑️</span></li>`
+            ).join("") +
             `</ul>`;
         } else {
           participantsHTML = `<div class="participants-list empty">Noch keine Teilnehmer</div>`;
@@ -42,6 +44,37 @@ document.addEventListener("DOMContentLoaded", () => {
         `;
 
         activitiesList.appendChild(activityCard);
+
+        // Event Delegation für Delete-Icon
+        activityCard.addEventListener("click", async (e) => {
+          if (e.target.classList.contains("delete-participant")) {
+            const email = e.target.getAttribute("data-email");
+            const activity = e.target.getAttribute("data-activity");
+            if (confirm(`Soll ${email} wirklich aus ${activity} entfernt werden?`)) {
+              try {
+                const response = await fetch(`/activities/${encodeURIComponent(activity)}/unregister?email=${encodeURIComponent(email)}`, {
+                  method: "POST"
+                });
+                const result = await response.json();
+                if (response.ok) {
+                  fetchActivities();
+                  messageDiv.textContent = result.message;
+                  messageDiv.className = "success";
+                } else {
+                  messageDiv.textContent = result.detail || "Fehler beim Entfernen";
+                  messageDiv.className = "error";
+                }
+                messageDiv.classList.remove("hidden");
+                setTimeout(() => messageDiv.classList.add("hidden"), 4000);
+              } catch (err) {
+                messageDiv.textContent = "Netzwerkfehler beim Entfernen.";
+                messageDiv.className = "error";
+                messageDiv.classList.remove("hidden");
+                setTimeout(() => messageDiv.classList.add("hidden"), 4000);
+              }
+            }
+          }
+        });
 
         // Add option to select dropdown
         const option = document.createElement("option");
@@ -76,6 +109,7 @@ document.addEventListener("DOMContentLoaded", () => {
         messageDiv.textContent = result.message;
         messageDiv.className = "success";
         signupForm.reset();
+        fetchActivities();
       } else {
         messageDiv.textContent = result.detail || "An error occurred";
         messageDiv.className = "error";
